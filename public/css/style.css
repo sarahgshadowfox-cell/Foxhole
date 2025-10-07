@@ -1,0 +1,559 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: #fff;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-body {
+    background-image: 
+        linear-gradient(rgba(30, 60, 114, 0.85), rgba(42, 82, 152, 0.85)),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><linearGradient id="ocean" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%231e3c72;stop-opacity:1" /><stop offset="100%" style="stop-color:%230a1929;stop-opacity:1" /></linearGradient></defs><rect fill="url(%23ocean)" width="800" height="600"/><path d="M400,150 L420,180 L440,150 L460,180 L440,200 L420,220 L400,200 L380,220 L360,200 L340,180 L360,150 L380,180 Z" fill="%238B4513" opacity="0.7"/><rect x="390" y="120" width="20" height="30" fill="%238B4513" opacity="0.7"/><polygon points="400,80 380,120 420,120" fill="%23f0e68c" opacity="0.8"/><path d="M0,400 Q100,380 200,400 T400,400 T600,400 T800,400 L800,600 L0,600 Z" fill="%23000033" opacity="0.3"/></svg>');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.ocean-waves {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(to top, rgba(0, 0, 51, 0.4), transparent);
+    z-index: 0;
+    pointer-events: none;
+    animation: wave 10s ease-in-out infinite;
+}
+
+@keyframes wave {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #ffd700;
+}
+
+.header h1 {
+    font-size: 3em;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 1.2em;
+    color: #f0e68c;
+}
+
+.section {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 30px;
+    border-radius: 10px;
+    border: 2px solid #4682b4;
+}
+
+.section h2 {
+    color: #ffd700;
+    margin-bottom: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="file"],
+textarea {
+    padding: 12px;
+    border: 2px solid #4682b4;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 1em;
+    font-family: 'Courier New', monospace;
+}
+
+input::placeholder {
+    color: #b0c4de;
+}
+
+button {
+    padding: 12px 24px;
+    background: #ffd700;
+    color: #1e3c72;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Courier New', monospace;
+}
+
+button:hover {
+    background: #ffed4e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.link {
+    text-align: center;
+    color: #87ceeb;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 15px;
+}
+
+.link:hover {
+    color: #add8e6;
+}
+
+.race-selection {
+    margin: 20px 0;
+}
+
+.race-selection h3 {
+    color: #ffd700;
+    margin-bottom: 15px;
+}
+
+.race-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.race-card:hover {
+    border-color: #ffd700;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.race-card.selected {
+    border-color: #ffd700;
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.race-card h4 {
+    color: #ffd700;
+    margin-bottom: 5px;
+}
+
+.race-bonuses {
+    font-size: 0.9em;
+    color: #98fb98;
+    margin-top: 10px;
+}
+
+.message {
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.message.error {
+    background: rgba(220, 20, 60, 0.8);
+    border: 2px solid #dc143c;
+}
+
+.message.success {
+    background: rgba(0, 128, 0, 0.8);
+    border: 2px solid #008000;
+}
+
+/* Game Page Styles */
+.game-body {
+    padding: 10px;
+}
+
+.game-container {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.game-header {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #ffd700;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.game-header h1 {
+    color: #ffd700;
+    font-size: 2em;
+}
+
+.player-info {
+    color: #f0e68c;
+    font-size: 1.1em;
+}
+
+.game-content {
+    display: grid;
+    grid-template-columns: 250px 1fr 300px;
+    gap: 20px;
+}
+
+.left-panel,
+.center-panel,
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.stats-panel,
+.location-panel,
+.actions-panel,
+.map-container,
+.settlements-panel,
+.chat-panel,
+.online-players {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #4682b4;
+}
+
+.stats-panel h3,
+.location-panel h3,
+.actions-panel h3,
+.map-container h3,
+.settlements-panel h3,
+.chat-panel h3,
+.online-players h3 {
+    color: #ffd700;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #4682b4;
+    padding-bottom: 5px;
+}
+
+.stat-line {
+    padding: 5px 0;
+    color: #f0e68c;
+}
+
+.actions-panel button {
+    margin: 5px 0;
+}
+
+.stat-allocation-panel {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #ffd700;
+}
+
+.stat-allocator {
+    margin: 10px 0;
+}
+
+.stat-allocator label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #f0e68c;
+}
+
+.stat-allocator input {
+    width: 60px;
+    padding: 5px;
+    margin-left: 10px;
+}
+
+#mapCanvas {
+    border: 2px solid #4682b4;
+    background: #0a1929;
+    display: block;
+    margin: 10px auto;
+}
+
+.map-controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.map-controls button {
+    padding: 8px;
+}
+
+.chat-panel {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+#chatMessages {
+    flex: 1;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.chat-message {
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.chat-sender {
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.chat-system {
+    color: #98fb98;
+    font-style: italic;
+}
+
+.chat-input {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input input {
+    flex: 1;
+}
+
+.chat-input button {
+    padding: 8px 16px;
+}
+
+.settlement-item {
+    padding: 8px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    color: #f0e68c;
+}
+
+#onlineCount {
+    text-align: center;
+    font-size: 1.3em;
+    color: #98fb98;
+    padding: 10px;
+}
+
+/* Admin Panel Styles */
+.admin-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.admin-info {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1.1em;
+}
+
+.admin-content {
+    display: grid;
+    gap: 20px;
+}
+
+.admin-stats,
+.admin-settlements,
+.admin-players,
+.admin-logs {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #4682b4;
+}
+
+.log-error {
+    background: rgba(220, 20, 60, 0.2);
+}
+
+.log-warning {
+    background: rgba(255, 165, 0, 0.2);
+}
+
+.log-info {
+    background: rgba(0, 128, 0, 0.1);
+}
+
+.log-system {
+    background: rgba(70, 130, 180, 0.2);
+}
+
+.admin-stats h2,
+.admin-settlements h2,
+.admin-players h2,
+.admin-logs h2 {
+    color: #ffd700;
+    margin-bottom: 15px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+.stat-card h3 {
+    color: #ffd700;
+    margin-bottom: 10px;
+}
+
+.stat-card p {
+    color: #f0e68c;
+    margin: 5px 0;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.data-table th,
+.data-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #4682b4;
+}
+
+.data-table th {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+}
+
+.data-table tr:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Profile Styles */
+.profile-container {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 30px;
+    border-radius: 10px;
+    border: 2px solid #4682b4;
+}
+
+.profile-header {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #4682b4;
+}
+
+.avatar-section {
+    text-align: center;
+}
+
+.avatar-section img {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    border: 3px solid #ffd700;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+#uploadSection {
+    margin: 15px 0;
+}
+
+#avatarInput {
+    margin-bottom: 10px;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h2 {
+    color: #ffd700;
+    font-size: 2.5em;
+    margin-bottom: 15px;
+}
+
+.profile-info p {
+    font-size: 1.2em;
+    margin: 10px 0;
+    color: #f0e68c;
+}
+
+.profile-stats,
+.profile-location {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.profile-stats h3,
+.profile-location h3 {
+    color: #ffd700;
+    margin-bottom: 15px;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .game-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: center;
+    }
+}

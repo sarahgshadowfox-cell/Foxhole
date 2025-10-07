@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foxhole - Player Profile</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚓ Player Profile ⚓</h1>
+        </div>
+
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="avatar-section">
+                    <img id="playerAvatar" src="/images/default-avatar.png" alt="Player Avatar">
+                    <div id="uploadSection" class="hidden">
+                        <form id="avatarForm" enctype="multipart/form-data">
+                            <input type="file" id="avatarInput" accept="image/*" required>
+                            <button type="submit">Upload Avatar</button>
+                        </form>
+                    </div>
+                    <button id="changeAvatarBtn" onclick="toggleAvatarUpload()">Change Avatar</button>
+                </div>
+                
+                <div class="profile-info">
+                    <h2 id="profileUsername"></h2>
+                    <p class="profile-race">Race: <span id="profileRace"></span></p>
+                    <p class="profile-level">Level: <span id="profileLevel"></span></p>
+                    <p class="profile-xp">XP: <span id="profileXP"></span></p>
+                </div>
+            </div>
+
+            <div class="profile-stats">
+                <h3>Statistics</h3>
+                <div id="profileStats"></div>
+            </div>
+
+            <div class="profile-location">
+                <h3>Current Location</h3>
+                <p>Coordinates: (<span id="profileX"></span>, <span id="profileY"></span>)</p>
+            </div>
+
+            <div class="profile-actions">
+                <button onclick="location.href='/game'">Back to Game</button>
+                <button onclick="location.href='/'">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/profile.js"></script>
+</body>
+</html>

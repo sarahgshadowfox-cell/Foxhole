@@ -1,0 +1,21 @@
+{
+  "name": "foxhole",
+  "version": "1.0.0",
+  "description": "a browser based text mmorpg",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"No tests specified\""
+  },
+  "keywords": ["mmorpg", "game", "pirate", "text-based"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "uuid": "^13.0.0",
+    "ws": "^8.18.3"
+  }
+}

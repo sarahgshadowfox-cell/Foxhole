@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foxhole - Game</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="game-body">
+    <div class="game-container">
+        <div class="game-header">
+            <h1>⚓ Foxhole ⚓</h1>
+            <div class="player-info">
+                <span id="playerName"></span> | 
+                Level <span id="playerLevel"></span> | 
+                XP: <span id="playerXP"></span>/<span id="playerMaxXP"></span>
+            </div>
+        </div>
+
+        <div class="game-content">
+            <div class="left-panel">
+                <div class="stats-panel">
+                    <h3>Character Stats</h3>
+                    <div id="statsDisplay"></div>
+                </div>
+                
+                <div class="location-panel">
+                    <h3>Location</h3>
+                    <div id="locationDisplay"></div>
+                </div>
+
+                <div class="actions-panel">
+                    <h3>Actions</h3>
+                    <button onclick="gainXP(10)">Train (+10 XP)</button>
+                    <button onclick="viewProfile()">View Profile</button>
+                    <button onclick="logout()">Logout</button>
+                </div>
+            </div>
+
+            <div class="center-panel">
+                <div class="map-container">
+                    <h3>Map View</h3>
+                    <canvas id="mapCanvas" width="600" height="600"></canvas>
+                    <div class="map-controls">
+                        <button onclick="movePlayer(-1, 0)">⬅️ West</button>
+                        <button onclick="movePlayer(1, 0)">➡️ East</button>
+                        <button onclick="movePlayer(0, -1)">⬆️ North</button>
+                        <button onclick="movePlayer(0, 1)">⬇️ South</button>
+                    </div>
+                </div>
+
+                <div class="settlements-panel">
+                    <h3>🏴‍☠️ Settlements</h3>
+                    <div id="settlementsList"></div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="chat-panel">
+                    <h3>Global Chat</h3>
+                    <div id="chatMessages"></div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Type a message...">
+                        <button onclick="sendChat()">Send</button>
+                    </div>
+                </div>
+
+                <div class="online-players">
+                    <h3>Online Players</h3>
+                    <div id="onlineCount">0 / 100</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/game.js"></script>
+</body>
+</html>

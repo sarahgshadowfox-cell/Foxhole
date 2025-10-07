@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foxhole - Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>⚓ Foxhole Admin Panel ⚓</h1>
+        </div>
+
+        <div class="admin-content">
+            <div class="admin-stats">
+                <h2>Server Statistics</h2>
+                <div class="stat-card">
+                    <h3>Players</h3>
+                    <p><span id="onlinePlayers">0</span> online / <span id="totalPlayers">0</span> total</p>
+                    <p>Max Capacity: <span id="maxPlayers">100</span></p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Map Info</h3>
+                    <p>Size: 150x150 tiles</p>
+                    <p>Settlements: <span id="settlementCount">12</span></p>
+                </div>
+            </div>
+
+            <div class="admin-settlements">
+                <h2>Settlements</h2>
+                <div id="settlementsTable"></div>
+            </div>
+
+            <div class="admin-players">
+                <h2>Player List</h2>
+                <button onclick="refreshPlayers()">Refresh</button>
+                <div id="playersTable"></div>
+            </div>
+        </div>
+
+        <div class="admin-actions">
+            <button onclick="location.href='/'">Back to Home</button>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

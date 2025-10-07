@@ -12,9 +12,37 @@ body {
     padding: 20px;
 }
 
+.login-body {
+    background-image: 
+        linear-gradient(rgba(30, 60, 114, 0.85), rgba(42, 82, 152, 0.85)),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><linearGradient id="ocean" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%231e3c72;stop-opacity:1" /><stop offset="100%" style="stop-color:%230a1929;stop-opacity:1" /></linearGradient></defs><rect fill="url(%23ocean)" width="800" height="600"/><path d="M400,150 L420,180 L440,150 L460,180 L440,200 L420,220 L400,200 L380,220 L360,200 L340,180 L360,150 L380,180 Z" fill="%238B4513" opacity="0.7"/><rect x="390" y="120" width="20" height="30" fill="%238B4513" opacity="0.7"/><polygon points="400,80 380,120 420,120" fill="%23f0e68c" opacity="0.8"/><path d="M0,400 Q100,380 200,400 T400,400 T600,400 T800,400 L800,600 L0,600 Z" fill="%23000033" opacity="0.3"/></svg>');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.ocean-waves {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(to top, rgba(0, 0, 51, 0.4), transparent);
+    z-index: 0;
+    pointer-events: none;
+    animation: wave 10s ease-in-out infinite;
+}
+
+@keyframes wave {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
 .container {
     max-width: 800px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
 }
 
 .header {
@@ -246,6 +274,30 @@ button:hover {
     margin: 5px 0;
 }
 
+.stat-allocation-panel {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #ffd700;
+}
+
+.stat-allocator {
+    margin: 10px 0;
+}
+
+.stat-allocator label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #f0e68c;
+}
+
+.stat-allocator input {
+    width: 60px;
+    padding: 5px;
+    margin-left: 10px;
+}
+
 #mapCanvas {
     border: 2px solid #4682b4;
     background: #0a1929;
@@ -330,6 +382,12 @@ button:hover {
     margin: 0 auto;
 }
 
+.admin-info {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1.1em;
+}
+
 .admin-content {
     display: grid;
     gap: 20px;
@@ -337,16 +395,34 @@ button:hover {
 
 .admin-stats,
 .admin-settlements,
-.admin-players {
+.admin-players,
+.admin-logs {
     background: rgba(0, 0, 0, 0.5);
     padding: 20px;
     border-radius: 10px;
     border: 2px solid #4682b4;
 }
 
+.log-error {
+    background: rgba(220, 20, 60, 0.2);
+}
+
+.log-warning {
+    background: rgba(255, 165, 0, 0.2);
+}
+
+.log-info {
+    background: rgba(0, 128, 0, 0.1);
+}
+
+.log-system {
+    background: rgba(70, 130, 180, 0.2);
+}
+
 .admin-stats h2,
 .admin-settlements h2,
-.admin-players h2 {
+.admin-players h2,
+.admin-logs h2 {
     color: #ffd700;
     margin-bottom: 15px;
 }

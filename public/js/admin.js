@@ -1,8 +1,34 @@
+const sessionId = localStorage.getItem('sessionId');
+const username = localStorage.getItem('username');
+
 document.addEventListener('DOMContentLoaded', () => {
+    if (!sessionId || !username) {
+        window.location.href = '/';
+        return;
+    }
+    
+    loadAdminInfo();
     loadAdminStats();
     loadSettlements();
     loadPlayers();
+    loadServerLogs();
 });
+
+async function loadAdminInfo() {
+    try {
+        const response = await fetch(`/api/player/${username}`);
+        const player = await response.json();
+        
+        const adminInfo = document.getElementById('adminInfo');
+        if (player.isAdmin) {
+            adminInfo.innerHTML = `<p style="color: #ffd700;">Logged in as: ${player.username} (Admin)</p>`;
+        } else {
+            adminInfo.innerHTML = `<p style="color: #f0e68c;">Logged in as: ${player.username}</p>`;
+        }
+    } catch (error) {
+        console.error('Failed to load admin info:', error);
+    }
+}
 
 async function loadAdminStats() {
     try {
@@ -96,4 +122,51 @@ async function loadPlayers() {
 
 function refreshPlayers() {
     loadPlayers();
+}
+
+async function loadServerLogs() {
+    try {
+        const response = await fetch(`/api/admin/logs?sessionId=${sessionId}`);
+        
+        if (!response.ok) {
+            document.getElementById('serverLogsTable').innerHTML = '<p style="color: #dc143c;">Admin access required to view logs</p>';
+            return;
+        }
+        
+        const logs = await response.json();
+        
+        const table = document.createElement('table');
+        table.className = 'data-table';
+        
+        // Show last 50 logs
+        const recentLogs = logs.slice(-50).reverse();
+        
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${recentLogs.map(log => `
+                    <tr class="log-${log.type}">
+                        <td>${new Date(log.timestamp).toLocaleString()}</td>
+                        <td>${log.type.toUpperCase()}</td>
+                        <td>${log.message}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        
+        document.getElementById('serverLogsTable').innerHTML = '';
+        document.getElementById('serverLogsTable').appendChild(table);
+    } catch (error) {
+        console.error('Failed to load server logs:', error);
+    }
+}
+
+function viewAdminProfile() {
+    window.location.href = `/profile/${username}`;
 }

@@ -43,13 +43,28 @@ function displayProfile(player) {
         document.getElementById('playerAvatar').src = player.avatar;
     }
     
+    // Show email and admin status
+    const profileInfo = document.querySelector('.profile-info');
+    if (player.email) {
+        const emailP = document.createElement('p');
+        emailP.className = 'profile-email';
+        emailP.innerHTML = `📧 Email: <span>${player.email}</span>`;
+        profileInfo.appendChild(emailP);
+    }
+    if (player.isAdmin) {
+        const adminP = document.createElement('p');
+        adminP.className = 'profile-admin';
+        adminP.innerHTML = `👑 <span style="color: #ffd700;">Administrator</span>`;
+        profileInfo.appendChild(adminP);
+    }
+    
     const statsDiv = document.getElementById('profileStats');
     statsDiv.innerHTML = `
         <div class="stat-line">💪 Strength: ${player.stats.strength}</div>
-        <div class="stat-line">🏃 Agility: ${player.stats.agility}</div>
         <div class="stat-line">🧠 Intelligence: ${player.stats.intelligence}</div>
-        <div class="stat-line">💬 Charisma: ${player.stats.charisma}</div>
-        <div class="stat-line">❤️ Vitality: ${player.stats.vitality}</div>
+        <div class="stat-line">⚡ Speed: ${player.stats.speed}</div>
+        <div class="stat-line">🍀 Luck: ${player.stats.luck}</div>
+        ${player.statPoints > 0 ? `<div class="stat-line" style="color: #ffd700;">✨ Available Points: ${player.statPoints}</div>` : ''}
     `;
 }
 

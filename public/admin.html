@@ -10,6 +10,7 @@
     <div class="admin-container">
         <div class="header">
             <h1>⚓ Foxhole Admin Panel ⚓</h1>
+            <div id="adminInfo" class="admin-info"></div>
         </div>
 
         <div class="admin-content">
@@ -38,10 +39,18 @@
                 <button onclick="refreshPlayers()">Refresh</button>
                 <div id="playersTable"></div>
             </div>
+            
+            <div class="admin-logs">
+                <h2>Server Logs</h2>
+                <button onclick="loadServerLogs()">Refresh Logs</button>
+                <div id="serverLogsTable"></div>
+            </div>
         </div>
 
         <div class="admin-actions">
-            <button onclick="location.href='/'">Back to Home</button>
+            <button onclick="viewAdminProfile()">View Admin Profile</button>
+            <button onclick="location.href='/game'">Back to Game</button>
+            <button onclick="location.href='/'">Logout</button>
         </div>
     </div>
 

@@ -32,8 +32,14 @@
                 <div class="actions-panel">
                     <h3>Actions</h3>
                     <button onclick="gainXP(10)">Train (+10 XP)</button>
+                    <button onclick="showStatAllocation()">Allocate Stats</button>
                     <button onclick="viewProfile()">View Profile</button>
                     <button onclick="logout()">Logout</button>
+                </div>
+                
+                <div id="statAllocationPanel" class="stat-allocation-panel hidden">
+                    <h3>Allocate Stat Points</h3>
+                    <div id="statAllocationContent"></div>
                 </div>
             </div>
 

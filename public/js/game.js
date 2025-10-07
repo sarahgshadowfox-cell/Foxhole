@@ -79,16 +79,17 @@ function updatePlayerUI() {
     const statsDisplay = document.getElementById('statsDisplay');
     statsDisplay.innerHTML = `
         <div class="stat-line">💪 Strength: ${player.stats.strength}</div>
-        <div class="stat-line">🏃 Agility: ${player.stats.agility}</div>
         <div class="stat-line">🧠 Intelligence: ${player.stats.intelligence}</div>
-        <div class="stat-line">💬 Charisma: ${player.stats.charisma}</div>
-        <div class="stat-line">❤️ Vitality: ${player.stats.vitality}</div>
+        <div class="stat-line">⚡ Speed: ${player.stats.speed}</div>
+        <div class="stat-line">🍀 Luck: ${player.stats.luck}</div>
+        ${player.statPoints > 0 ? `<div class="stat-line" style="color: #ffd700;">✨ Available Points: ${player.statPoints}</div>` : ''}
     `;
     
     const locationDisplay = document.getElementById('locationDisplay');
     locationDisplay.innerHTML = `
         <div class="stat-line">X: ${player.x}</div>
         <div class="stat-line">Y: ${player.y}</div>
+        ${player.email ? `<div class="stat-line">📧 ${player.email}</div>` : ''}
     `;
 }
 
@@ -175,13 +176,13 @@ function renderMap(mapData) {
 
 function getTileColor(type) {
     const colors = {
-        water: '#0066CC',
-        grass: '#228B22',
-        forest: '#006400',
-        mountain: '#8B4513',
-        beach: '#F4A460'
+        water: '#0055AA',  // Blue ocean
+        grass: '#22AA22',   // Green islands
+        forest: '#22AA22',  // Green islands
+        mountain: '#22AA22', // Green islands
+        beach: '#22AA22'    // Green islands
     };
-    return colors[type] || '#000000';
+    return colors[type] || '#0055AA';
 }
 
 function movePlayer(dx, dy) {
@@ -252,13 +253,121 @@ async function gainXP(amount) {
             player = data.player;
             updatePlayerUI();
             
+            if (data.bonusXP > 0) {
+                addChatMessage({
+                    type: 'chat',
+                    sender: 'System',
+                    message: `Lucky! You gained ${data.bonusXP} bonus XP!`
+                });
+            }
+            
             if (data.player.level > oldLevel) {
-                alert(`Congratulations! You reached level ${data.player.level}!`);
+                alert(`Congratulations! You reached level ${data.player.level}! You gained 2 stat points.`);
             }
         }
     } catch (error) {
         console.error('Failed to gain XP:', error);
     }
+}
+
+function showStatAllocation() {
+    if (!player || player.statPoints <= 0) {
+        alert('You have no stat points to allocate!');
+        return;
+    }
+    
+    const panel = document.getElementById('statAllocationPanel');
+    const content = document.getElementById('statAllocationContent');
+    
+    content.innerHTML = `
+        <p>Available Points: <span id="remainingPoints">${player.statPoints}</span></p>
+        <div class="stat-allocator">
+            <label>💪 Strength: <input type="number" id="allocStrength" min="0" max="${player.statPoints}" value="0"></label>
+        </div>
+        <div class="stat-allocator">
+            <label>🧠 Intelligence: <input type="number" id="allocIntelligence" min="0" max="${player.statPoints}" value="0"></label>
+        </div>
+        <div class="stat-allocator">
+            <label>⚡ Speed: <input type="number" id="allocSpeed" min="0" max="${player.statPoints}" value="0"></label>
+        </div>
+        <div class="stat-allocator">
+            <label>🍀 Luck: <input type="number" id="allocLuck" min="0" max="${player.statPoints}" value="0"></label>
+        </div>
+        <p style="font-size: 0.9em; color: #98fb98;">Luck increases chance of bonus XP (0.25% per point)</p>
+        <button onclick="applyStatAllocation()">Apply</button>
+        <button onclick="closeStatAllocation()">Cancel</button>
+    `;
+    
+    panel.classList.remove('hidden');
+    
+    // Add input listeners to update remaining points
+    ['allocStrength', 'allocIntelligence', 'allocSpeed', 'allocLuck'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateRemainingPoints);
+    });
+}
+
+function updateRemainingPoints() {
+    const strength = parseInt(document.getElementById('allocStrength').value) || 0;
+    const intelligence = parseInt(document.getElementById('allocIntelligence').value) || 0;
+    const speed = parseInt(document.getElementById('allocSpeed').value) || 0;
+    const luck = parseInt(document.getElementById('allocLuck').value) || 0;
+    const total = strength + intelligence + speed + luck;
+    const remaining = player.statPoints - total;
+    
+    document.getElementById('remainingPoints').textContent = remaining;
+    
+    if (remaining < 0) {
+        document.getElementById('remainingPoints').style.color = '#dc143c';
+    } else {
+        document.getElementById('remainingPoints').style.color = '#ffd700';
+    }
+}
+
+async function applyStatAllocation() {
+    const strength = parseInt(document.getElementById('allocStrength').value) || 0;
+    const intelligence = parseInt(document.getElementById('allocIntelligence').value) || 0;
+    const speed = parseInt(document.getElementById('allocSpeed').value) || 0;
+    const luck = parseInt(document.getElementById('allocLuck').value) || 0;
+    const total = strength + intelligence + speed + luck;
+    
+    if (total > player.statPoints) {
+        alert('Not enough stat points!');
+        return;
+    }
+    
+    if (total === 0) {
+        alert('Please allocate at least one stat point!');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/player/${username}/allocate-stats`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId,
+                stats: { strength, intelligence, speed, luck }
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            player = data.player;
+            updatePlayerUI();
+            closeStatAllocation();
+            alert('Stats allocated successfully!');
+        } else {
+            alert(data.error || 'Failed to allocate stats');
+        }
+    } catch (error) {
+        console.error('Failed to allocate stats:', error);
+        alert('Failed to allocate stats');
+    }
+}
+
+function closeStatAllocation() {
+    document.getElementById('statAllocationPanel').classList.add('hidden');
 }
 
 function viewProfile() {

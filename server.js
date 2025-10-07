@@ -49,12 +49,27 @@ const gameData = {
   sessions: new Map(),
   map: null,
   settlements: [],
-  chatHistory: []
+  chatHistory: [],
+  serverLogs: []
 };
+
+// Server logging function
+function logServer(message, type = 'info') {
+  const logEntry = {
+    timestamp: Date.now(),
+    type: type,
+    message: message
+  };
+  gameData.serverLogs.push(logEntry);
+  if (gameData.serverLogs.length > 1000) {
+    gameData.serverLogs.shift();
+  }
+  console.log(`[${type.toUpperCase()}] ${message}`);
+}
 
 // Load or initialize game data
 const DATA_FILE = './data/game_data.json';
-function loadGameData() {
+async function loadGameData() {
   if (fs.existsSync(DATA_FILE)) {
     const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
     gameData.map = data.map;
@@ -64,8 +79,36 @@ function loadGameData() {
     }
   } else {
     initializeMap();
+    await initializeAdmin();
     saveGameData();
   }
+}
+
+// Initialize admin account
+async function initializeAdmin() {
+  const adminPassword = await bcrypt.hash('123456789', 10);
+  const adminPlayer = {
+    username: 'Shadowfox',
+    password: adminPassword,
+    email: 'admin@foxhole.game',
+    race: 'human',
+    level: 100,
+    xp: 0,
+    isAdmin: true,
+    stats: {
+      strength: 50,
+      intelligence: 50,
+      speed: 50,
+      luck: 50
+    },
+    statPoints: 0,
+    x: gameData.settlements[0]?.x || 75,
+    y: gameData.settlements[0]?.y || 75,
+    avatar: '/images/default-avatar.png',
+    createdAt: Date.now()
+  };
+  gameData.players.set('Shadowfox', adminPlayer);
+  logServer('Admin account "Shadowfox" initialized', 'system');
 }
 
 function saveGameData() {
@@ -322,14 +365,20 @@ function sanitizePlayer(player) {
 // REST API Routes
 app.post('/api/register', async (req, res) => {
   try {
-    const { username, password, race } = req.body;
+    const { username, password, email, race } = req.body;
     
-    if (!username || !password || !race) {
+    if (!username || !password || !email || !race) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
     if (gameData.players.has(username)) {
       return res.status(400).json({ error: 'Username already exists' });
+    }
+    
+    // Check if email already exists
+    const emailExists = Array.from(gameData.players.values()).some(p => p.email === email);
+    if (emailExists) {
+      return res.status(400).json({ error: 'Email already registered' });
     }
     
     if (!RACES[race]) {
@@ -344,16 +393,18 @@ app.post('/api/register', async (req, res) => {
     const player = {
       username,
       password: hashedPassword,
+      email,
       race,
       level: 1,
       xp: 0,
+      isAdmin: false,
       stats: {
         strength: 10 + RACES[race].bonuses.strength,
-        agility: 10 + RACES[race].bonuses.agility,
         intelligence: 10 + RACES[race].bonuses.intelligence,
-        charisma: 10 + RACES[race].bonuses.charisma,
-        vitality: 10 + RACES[race].bonuses.vitality
+        speed: 10 + RACES[race].bonuses.agility,
+        luck: 10
       },
+      statPoints: 5, // 5 redistributable stat points
       x: startSettlement.x,
       y: startSettlement.y,
       avatar: '/images/default-avatar.png',
@@ -363,9 +414,11 @@ app.post('/api/register', async (req, res) => {
     gameData.players.set(username, player);
     saveGameData();
     
+    logServer(`New player registered: ${username} (${email})`, 'info');
+    
     res.json({ success: true, message: 'Character created successfully!' });
   } catch (error) {
-    console.error('Registration error:', error);
+    logServer(`Registration error: ${error.message}`, 'error');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -376,21 +429,25 @@ app.post('/api/login', async (req, res) => {
     
     const player = gameData.players.get(username);
     if (!player) {
+      logServer(`Failed login attempt for username: ${username}`, 'warning');
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     
     const valid = await bcrypt.compare(password, player.password);
     if (!valid) {
+      logServer(`Invalid password for username: ${username}`, 'warning');
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     
-    // Check max players
-    if (clients.size >= MAX_PLAYERS) {
+    // Check max players (admins bypass this check)
+    if (!player.isAdmin && clients.size >= MAX_PLAYERS) {
       return res.status(503).json({ error: 'Server is full (max 100 players)' });
     }
     
     const sessionId = uuidv4();
-    gameData.sessions.set(sessionId, { username, createdAt: Date.now() });
+    gameData.sessions.set(sessionId, { username, isAdmin: player.isAdmin, createdAt: Date.now() });
+    
+    logServer(`Player logged in: ${username}${player.isAdmin ? ' (Admin)' : ''}`, 'info');
     
     res.json({ 
       success: true, 
@@ -398,7 +455,7 @@ app.post('/api/login', async (req, res) => {
       player: sanitizePlayer(player)
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logServer(`Login error: ${error.message}`, 'error');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -449,7 +506,12 @@ app.post('/api/player/:username/xp', (req, res) => {
       return res.status(404).json({ error: 'Player not found' });
     }
     
-    player.xp += amount;
+    // Apply luck-based bonus (0.25% per luck point)
+    const luckBonus = player.stats.luck * 0.0025;
+    const bonusXP = Math.random() < luckBonus ? Math.floor(amount * 0.1) : 0;
+    const totalXP = amount + bonusXP;
+    
+    player.xp += totalXP;
     
     // Level up logic
     const xpForNextLevel = player.level * 100;
@@ -457,18 +519,86 @@ app.post('/api/player/:username/xp', (req, res) => {
       player.level++;
       player.xp -= xpForNextLevel;
       
-      // Stat increases on level up
-      player.stats.strength += 2;
-      player.stats.agility += 2;
-      player.stats.intelligence += 2;
-      player.stats.charisma += 1;
-      player.stats.vitality += 3;
+      // Give 2 stat points per level up
+      player.statPoints += 2;
+      
+      logServer(`Player ${player.username} leveled up to ${player.level}`, 'info');
     }
     
     saveGameData();
+    res.json({ success: true, player: sanitizePlayer(player), bonusXP });
+  } catch (error) {
+    logServer(`XP update error: ${error.message}`, 'error');
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Stat point allocation
+app.post('/api/player/:username/allocate-stats', (req, res) => {
+  try {
+    const { sessionId, stats } = req.body;
+    const session = gameData.sessions.get(sessionId);
+    
+    if (!session || session.username !== req.params.username) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    const player = gameData.players.get(req.params.username);
+    if (!player) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+    
+    // Calculate total points being allocated
+    const totalPoints = (stats.strength || 0) + (stats.intelligence || 0) + (stats.speed || 0) + (stats.luck || 0);
+    
+    if (totalPoints > player.statPoints) {
+      return res.status(400).json({ error: 'Not enough stat points' });
+    }
+    
+    // Apply stat allocations
+    player.stats.strength += (stats.strength || 0);
+    player.stats.intelligence += (stats.intelligence || 0);
+    player.stats.speed += (stats.speed || 0);
+    player.stats.luck += (stats.luck || 0);
+    player.statPoints -= totalPoints;
+    
+    saveGameData();
+    logServer(`Player ${player.username} allocated ${totalPoints} stat points`, 'info');
+    
     res.json({ success: true, player: sanitizePlayer(player) });
   } catch (error) {
-    console.error('XP update error:', error);
+    logServer(`Stat allocation error: ${error.message}`, 'error');
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update player email
+app.post('/api/player/:username/email', (req, res) => {
+  try {
+    const { sessionId, email } = req.body;
+    const session = gameData.sessions.get(sessionId);
+    
+    if (!session || session.username !== req.params.username) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    const player = gameData.players.get(req.params.username);
+    if (!player) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+    
+    // Check if email already exists
+    const emailExists = Array.from(gameData.players.values()).some(p => p.email === email && p.username !== req.params.username);
+    if (emailExists) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+    
+    player.email = email;
+    saveGameData();
+    
+    res.json({ success: true, email: player.email });
+  } catch (error) {
+    logServer(`Email update error: ${error.message}`, 'error');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -486,6 +616,22 @@ app.get('/api/admin/stats', (req, res) => {
 app.get('/api/admin/players', (req, res) => {
   const players = Array.from(gameData.players.values()).map(sanitizePlayer);
   res.json(players);
+});
+
+app.get('/api/admin/logs', (req, res) => {
+  const { sessionId } = req.query;
+  const session = gameData.sessions.get(sessionId);
+  
+  if (!session) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+  
+  const player = gameData.players.get(session.username);
+  if (!player || !player.isAdmin) {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  
+  res.json(gameData.serverLogs);
 });
 
 app.get('/api/races', (req, res) => {
@@ -514,11 +660,13 @@ app.get('/profile/:username', (req, res) => {
 });
 
 // Initialize and start server
-loadGameData();
-
-server.listen(PORT, () => {
-  console.log(`Foxhole MMORPG server running on port ${PORT}`);
-  console.log(`Max players: ${MAX_PLAYERS}`);
-  console.log(`Map size: 150x150 tiles`);
-  console.log(`Settlements: ${gameData.settlements.length}`);
-});
+(async () => {
+  await loadGameData();
+  
+  server.listen(PORT, () => {
+    logServer(`Foxhole MMORPG server running on port ${PORT}`, 'system');
+    logServer(`Max players: ${MAX_PLAYERS}`, 'system');
+    logServer(`Map size: 150x150 tiles`, 'system');
+    logServer(`Settlements: ${gameData.settlements.length}`, 'system');
+  });
+})();
